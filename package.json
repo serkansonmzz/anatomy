@@ -1,0 +1,12 @@
+{
+  "name": "anatomy-atlas",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Interactive 3D schematic human anatomy atlas in Turkish",
+  "scripts": {
+    "check": "node --check dist/app.js && node --check dist/model.js && node --check dist/data.js && node --check dist/reproductive.js && node --check dist/software-renderer.js",
+    "test": "node --test tests/*.test.mjs",
+    "build": "python3 scripts/bundle-standalone.py"
+  }
+}
