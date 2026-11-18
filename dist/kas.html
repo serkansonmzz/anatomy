@@ -1,0 +1,83 @@
+<!doctype html><html lang="tr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#10181a"><title>Kas Laboratuvarı · Anatomy</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0c1315;color:#eef4ef;font:16px/1.55 system-ui,sans-serif}header,main,footer{max-width:1260px;margin:auto;padding:0 clamp(16px,4vw,56px)}header{height:70px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #304143}a{color:#aee1d0}header a{text-decoration:none}header b{font-size:25px;letter-spacing:-1.5px}h1,h2,p{margin:0}h1{font-size:clamp(36px,5vw,64px);line-height:1.08;letter-spacing:-.055em;margin:20px 0 12px}.intro{padding:24px 0;color:#afc0bd}.intro h1{color:#f5eee6}.tabs,.controls,.tools{display:flex;gap:8px;flex-wrap:wrap}.tabs{margin:0 0 16px}button{font:inherit;color:inherit;background:#1b282a;border:1px solid #394849;border-radius:8px;padding:8px 13px;cursor:pointer}button[aria-pressed=true]{background:#a6dec9;color:#10251d;border-color:#a6dec9}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #ffb397;outline-offset:2px}.grid{display:grid;grid-template-columns:minmax(0,1.95fr) minmax(250px,1fr);border:1px solid #344445;border-radius:18px;overflow:hidden;background:#142023}.stage{background:radial-gradient(ellipse at 45% 54%,#283431,#101b1d 73%);min-width:0;padding:14px}.stage strong,.micro{font:600 11px/1.4 ui-monospace,monospace;letter-spacing:.12em;color:#a6dec9;text-transform:uppercase}canvas{display:block;width:100%;aspect-ratio:620/390}.side{border-left:1px solid #344445;padding:clamp(18px,3vw,36px);align-self:stretch}.side h2{font-size:clamp(24px,2.7vw,38px);letter-spacing:-.045em;margin:12px 0}.side p{color:#c6d2cc}.note{border-top:1px solid #354747;margin:22px 0 0;padding:15px 0;font-size:14px;color:#f7d4be}.controls{align-items:center;border-top:1px solid #384745;padding-top:12px}.slider{flex:1;display:grid;gap:3px;font-size:13px}.slider input{width:100%;accent-color:#a6dec9}.tools{margin-top:12px}.tools button{font-size:13px}footer{padding-top:20px;padding-bottom:26px;font-size:13px;color:#9daea9}footer a{margin-right:16px}button:disabled{opacity:.45}@media(max-width:780px){.grid{grid-template-columns:1fr}.side{border-left:0;border-top:1px solid #344445}.tabs button{font-size:14px}.stage{padding:10px}.intro{padding-top:12px}.intro h1{margin-top:10px}}
+</style>
+<header><b>anatomy<span style="color:#a6dec9">.</span></b><a href="./">← Anatomi atlası</a></header>
+<main><div class="intro"><h1>Kas Laboratuvarı</h1><p>Bir dambıl curl hareketini kolun dışından kas lifinin içine kadar izle.</p></div>
+<nav class="tabs" aria-label="İnceleme ölçeği"></nav>
+<div class="grid"><section class="stage"><strong id="scale"></strong><canvas role="img" id="scene"></canvas>
+<div class="controls"><button id="play">Oynat</button><label class="slider"><span id="rangeText"></span><input id="time" type="range" min="0" max="100" value="46"></label></div>
+<div class="tools" id="tools"></div></section><aside class="side"><span class="micro" id="tag"></span><h2 id="title"></h2><p id="copy"></p><div class="note" id="note"></div><button id="next"></button></aside></div></main>
+<footer><details><summary>Model ve bilimsel kaynaklar</summary><p>Ölçekler ve büyüme miktarı eğitim amaçlı şematiktir. Renkler farklı yapıları ayırır.</p><a href="https://openstax.org/books/anatomy-and-physiology-2e/pages/10-2-skeletal-muscle">Kas lifi anatomisi</a><a href="https://openstax.org/books/anatomy-and-physiology-2e/pages/10-3-muscle-fiber-contraction-and-relaxation">Kasılma</a><a href="https://pubmed.ncbi.nlm.nih.gov/29282529/">Protein sentezi ve hipertrofi</a><a href="https://pubmed.ncbi.nlm.nih.gov/41843416/">ACSM · Direnç antrenmanı</a></details></footer>
+<script>
+const $=id=>document.getElementById(id);
+const stages=[
+ ['Kol','Dirsek fleksiyonu','Bir tekrarın mekaniği','Biseps ve altındaki brakiyalis, tendonları üzerinden ön kola kuvvet uygular. Dambılı kaldır, hareketin ortasında tut, sonra kontrollü indir.','Yükü değiştirip aynı dirsek açısına dön. Aşağı yönlü ok dambılın ağırlığını gösterir. Mekanik gerilim, yük taşırken kas dokusunda oluşan iç kuvvetle ilişkilidir.'],
+ ['Lif demeti','Kas → demet → lif','Demetin içini aç','Kas, bağ dokusuyla sarılmış lif demetlerinden oluşur. Kesitteki her küçük daire uzun bir kas lifinin ucudur. Öne çıkan lif tek bir kas hücresidir.','Sürgüyü sağa çek. Seçili lifin demetin içinden çıkışını ve lifleri bir arada tutan dış kılıfı izle.'],
+ ['Kas lifi','Lif → miyofibril','Tek hücrenin içinde','Kas lifinin zarı sarkolemmadır. Çekirdekler zarın hemen altında, miyofibriller ise hücre boyunca yan yana uzanır. Enine bantlar, tekrarlanan sarkomerlerin hizalanmasından doğar.','Kesiti açtıkça tek bir miyofibril öne çıkar. Onun üzerindeki iki Z çizgisi arasında kalan bölüm bir sarkomerdir.'],
+ ['Sarkomer','Miyofibril → sarkomer','İplikler nasıl kayar?','Uyarı ile hücre içinde kalsiyum artar ve aktindeki bağlanma bölgeleri açılır. Miyozin başları aktine tutunup onu merkeze çeker. ATP bağlanması başı ayırır, ATP hidrolizi yeni çevrime hazırlar.','Bir kısalma evresini ilerlet. İnce ve kalın ipliklerin boyları aynı kalırken örtüşmeleri artar ve iki Z çizgisi birbirine yaklaşır.'],
+ ['Hipertrofi','Lifin enine kesiti','Haftalar içinde büyüme','Tekrarlanan yüklenme, kas hücresinde protein sentezini düzenleyen sinyalleri tetikler. Zaman içinde biriken kas proteinleri lifin enine kesit alanının artmasına katkıda bulunur.','Yeterince zorlayıcı setler, düzenli antrenman ve zamanla artan çalışma uyaranı gelişimi destekler. Beslenme ve toparlanma da bu sürece eşlik eder. Kesikli çizgi başlangıç kesitidir.']
+];
+const cv=$('scene'), g=cv.getContext('2d'), tau=2*Math.PI;
+let mode=0,t=.46,playing=false,last=0,heavy=false,deep=false,frame=0;
+const times=[.46,.42,.52,.25,.55];
+function line(x,y,X,Y,color,w=2){g.beginPath();g.moveTo(x,y);g.lineTo(X,Y);g.strokeStyle=color;g.lineWidth=w;g.stroke()}
+function oval(x,y,rx,ry,color){g.beginPath();g.ellipse(x,y,rx,ry,0,0,tau);g.fillStyle=color;g.fill()}
+function tag(txt,x,y,X,Y){line(x,y,X,Y,'#93a99d',1);oval(x,y,2.7,2.7,'#bce4d0');g.font='bold 15px system-ui';let width=g.measureText(txt).width;let px=Math.max(6,Math.min(614-width,X-width/2));g.fillStyle='#132022';g.fillRect(px-3,Y-16,width+6,21);g.fillStyle='#edece3';g.fillText(txt,px,Y)}
+// Ring sections form a tapered, striated volume between tendon insertions.
+function tissue(a,b,r,hue,kind='muscle'){
+ let dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy),nx=-dy/len,ny=dx/len;
+ function vertex(u,v){let profile=kind==='muscle'?.095+.905*Math.pow(Math.max(0,Math.sin(Math.PI*u)),.72):.65+.35*Math.cos(u*Math.PI*2)**2;let side=r*profile*Math.cos(v),z=r*profile*Math.sin(v);return [a[0]+dx*u+nx*side+.24*z,a[1]+dy*u+ny*side-.10*z]}
+ for(let j=0;j<24;j++){let v=Math.PI*j/24,V=Math.PI*(j+1)/24;for(let i=0;i<22;i++){let u=i/22,U=(i+1)/22;let pts=[vertex(u,v),vertex(U,v),vertex(U,V),vertex(u,V)];g.beginPath();pts.forEach(([x,y],k)=>k?g.lineTo(x,y):g.moveTo(x,y));g.closePath();let light=25+25*Math.sin(v+.35)+(j%3===0?5:0);g.fillStyle=g.strokeStyle='hsl('+hue+' '+(kind==='muscle'?49:15)+'% '+(light+(kind==='muscle'?0:19))+'%)';g.lineWidth=.65;g.fill();g.stroke()}}
+}
+function arm(){
+ let bend=t<.42?t/.42:t<.56?1:(1-t)/.44,theta=(80-100*bend)*Math.PI/180;
+ let e=[264,221],w=[e[0]+127*Math.cos(theta),e[1]+127*Math.sin(theta)],p=[e[0]+29*Math.cos(theta),e[1]+29*Math.sin(theta)];
+ let side=1; tissue([244,54],e,10,42,'bone');tissue([e[0]-6,e[1]],w,9,42,'bone');
+ tissue([235-side*9,68],[252-side*9,228],19,6);
+ tissue([249,122],p,deep?24:18,16);
+ if(!deep){tissue([244+side*10,52],[259+side*14,206],17+4*bend,352);tissue([242+side*22,62],[265+side*14,204],12+4*bend,7);tissue([264+side*14,200],p,4,43,'bone')}
+ tissue([e[0]+8,e[1]+3],w,15,11);
+ let [x,y]=w;line(x-28,y,x+28,y,'#bec9c0',7);for(let k of [-1,1]){g.fillStyle='#758680';g.fillRect(x+k*24-5,y-15,10,30);if(heavy)g.fillRect(x+k*34-4,y-13,8,26)}
+ let arrow=heavy?49:27;line(x,y+10,x,y+arrow,'#abebd3',3);line(x,y+arrow,x-5,y+arrow-7,'#abebd3');line(x,y+arrow,x+5,y+arrow-7,'#abebd3');
+ tag(deep?'Brakiyalis':'Biseps',257,139,155,111);tag('Dirsek',e[0],e[1],164,258);tag('Dambıl',x+24,y,478,Math.min(342,y+20));if(!deep)tag('Tendon',p[0],p[1],386,190)
+}
+function rod(x,y,rx,ry,dx,dy,body,face,bands=false){
+ const grad=g.createLinearGradient(x,y-ry,x,y+ry);grad.addColorStop(0,'#ffe0b7');grad.addColorStop(.17,body);grad.addColorStop(.68,body);grad.addColorStop(1,'#542f39');
+ g.beginPath();g.moveTo(x,y-ry);g.lineTo(x+dx,y+dy-ry);g.ellipse(x+dx,y+dy,rx,ry,0,-Math.PI/2,Math.PI/2);g.lineTo(x,y+ry);g.ellipse(x,y,rx,ry,0,Math.PI/2,1.5*Math.PI);g.fillStyle=grad;g.fill();
+ for(let i=1;i<13;i++){let s=i/13;if(bands){g.beginPath();g.ellipse(x+dx*s,y+dy*s,rx,ry,0,-Math.PI/2,Math.PI/2);g.strokeStyle=i%2?'#702c42aa':'#ffc4a788';g.lineWidth=2;g.stroke()}else{let a=Math.PI*s;line(x+rx*Math.sin(a),y+ry*Math.cos(a),x+dx+rx*Math.sin(a),y+dy+ry*Math.cos(a),'#ffd0ac55',1)}}
+ oval(x+dx,y+dy,rx,ry,face)
+}
+function packing(fn){for(let row=-5;row<=5;row++)for(let col=-5;col<=5;col++){let x=(col+(Math.abs(row)%2)*.5)*.194,y=row*.17;if(x*x+y*y<.82)fn(x,y,row,col)}}
+function cut(micro){
+ let x=133,y=212,dx=202,dy=-38,rx=47,ry=76;
+ rod(x,y,rx,ry,dx,dy,micro?'#bb6969':'#a3564d','#623b42',micro);
+ packing((a,b,row,col)=>oval(x+dx+a*rx,y+dy+b*ry,3.9,6.9,(row+col)%3?'#e29a80':'#f4b49d'));
+ let extend=20+t*128;rod(x+dx,y+dy,8,12,extend,-extend*.21,micro?'#c8796f':'#c48268','#ffd8a6',true);
+ if(micro){for(let i=0;i<4;i++)oval(152+i*47,142-i*8,8,3.5,'#bea4d8');tag('Çekirdek',200,133,154,74)}
+ tag(micro?'Sarkolemma':'Bağ dokusu kılıfı',190,266,160,319);tag(micro?'Miyofibriller':'Kas lifleri',351,211,430,278);
+ tag(micro?'Tek miyofibril':'Tek kas lifi',x+dx+extend,y+dy-extend*.21,469,96)
+}
+function sarcomere(){
+ let L=75+72*t,R=620-L;for(let z of [L,R]){line(z,98,z,278,'#d8c9ef',6);tag('Z çizgisi',z,102,z,73)}
+ for(let y of [150,213]){
+ line(215,y+16,405,y+16,'#e69772',10);
+ for(let x=220;x<405;x+=13){let sign=x<310?-1:1;line(x,y+16,x+sign*(5+3*Math.sin(t*tau*3)),y+4,'#ffd8ae',2)}
+ for(let z of [L,R]){let s=z===L?1:-1;line(z,y,z+s*151,y,'#91d9c8',4);for(let k=4;k<150;k+=7)oval(z+s*k,y,3.5,3.5,'#a9e8d8')}
+ }
+ tag('Aktin',L+38,213,153,315);tag('Miyozin',308,230,370,315);line(310,113,310,253,'#e7c4ad55',1)
+}
+function growth(){let r=81+30*t,x=305,y=193;oval(x,y,r,r,'#ecc3a4');oval(x,y,r-4,r-4,'#78434a');packing((a,b,row,col)=>{let X=x+a*r,Y=y+b*r;oval(X,Y,r*.087,r*.081,(col+row)%3?'#c67868':'#d99578');for(let i=-1;i<=1;i++)line(X-3,Y+i*2,X+3,Y+i*2,'#f4b69a',.8)});g.setLineDash([5,5]);g.beginPath();g.arc(x,y,81,0,tau);g.strokeStyle='#a9f1d8';g.lineWidth=2;g.stroke();g.setLineDash([]);tag('Başlangıç',x-80,y,126,157);tag('Lif sınırı',x+r-4,y+12,481,169);tag('Miyofibriller',x+16,y+35,460,276);g.fillStyle='#bcdacf';g.font='16px system-ui';g.textAlign='center';g.fillText(t<.26?'Başlangıç kesiti':t<.54?'Tekrarlanan antrenman uyaranı':t<.78?'Protein yapımı ve yenilenme':'Birikimli uyum · daha geniş kesit',310,346);g.textAlign='left'}
+const drawings=[arm,()=>cut(false),()=>cut(true),sarcomere,growth];
+function draw(){let w=cv.clientWidth;if(!w)return;let h=w*390/620,dpr=Math.min(devicePixelRatio||1,2);if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}else g.clearRect(0,0,620,390);g.setTransform(cv.width/620,0,0,cv.height/390,0,0);drawings[mode]();
+ let phase=t<.42?'Kaldırma':t<.56?'Yük altında tutma':'Kontrollü indirme';
+ $('rangeText').textContent=['Tekrar · '+phase,'Lifi demetten ayır','Miyofibrili liften ayır','Gevşek → kısalmış','Başlangıç → haftalar sonra'][mode];cv.setAttribute('aria-label',stages[mode][2]+' · '+$('rangeText').textContent)}
+function pause(){playing=false;cancelAnimationFrame(frame);$('play').textContent='Oynat'}
+function tick(now){if(!playing)return;t=Math.min(1,t+(now-last)/8500);last=now;$('time').value=Math.round(t*100);draw();if(t>=1)pause();else frame=requestAnimationFrame(tick)}
+function option(label,pressed,fn){let b=document.createElement('button');b.textContent=label;b.setAttribute('aria-pressed',pressed);b.onclick=fn;$('tools').append(b)}
+function options(){ $('tools').replaceChildren();if(mode===0){option(heavy?'Ağır dambıl':'Hafif dambıl',heavy,()=>{heavy=!heavy;options();draw()});option('Derin katman',deep,()=>{deep=!deep;options();draw()});}}
+function select(i){times[mode]=t;pause();mode=i;t=times[i];let s=stages[i];$('scale').textContent=s[1];$('tag').textContent=s[0];$('title').textContent=s[2];$('copy').textContent=s[3];$('note').textContent=s[4];$('next').textContent=i===4?'Kola dön ↩':stages[i+1][0]+' →';$('time').value=t*100;document.querySelectorAll('.tabs button').forEach((b,j)=>b.setAttribute('aria-pressed',j===i));options();draw()}
+stages.forEach((s,i)=>{let b=document.createElement('button');b.textContent=s[0];b.onclick=()=>select(i);document.querySelector('.tabs').append(b)});
+$('next').onclick=()=>select((mode+1)%5);$('time').oninput=e=>{pause();t=+e.target.value/100;draw()};$('play').onclick=()=>{if(playing){pause();return}if(t>=1)t=0;playing=true;last=performance.now();$('play').textContent='Durdur';frame=requestAnimationFrame(tick)};
+select(0);new ResizeObserver(draw).observe(cv.parentElement);document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()})
+</script></html>
