@@ -13,14 +13,14 @@
 const $=id=>document.getElementById(id);
 const stages=[
  ['Kol','Dirsek fleksiyonu','Bir tekrarın mekaniği','Biseps ve altındaki brakiyalis, tendonları üzerinden ön kola kuvvet uygular. Dambılı kaldır, hareketin ortasında tut, sonra kontrollü indir.','Yükü değiştirip aynı dirsek açısına dön. Aşağı yönlü ok dambılın ağırlığını gösterir. Mekanik gerilim, yük taşırken kas dokusunda oluşan iç kuvvetle ilişkilidir.'],
- ['Lif demeti','Kas → demet → lif','Demetin içini aç','Kas, bağ dokusuyla sarılmış lif demetlerinden oluşur. Kesitteki her küçük daire uzun bir kas lifinin ucudur. Öne çıkan lif tek bir kas hücresidir.','Sürgüyü sağa çek. Seçili lifin demetin içinden çıkışını ve lifleri bir arada tutan dış kılıfı izle.'],
- ['Kas lifi','Lif → miyofibril','Tek hücrenin içinde','Kas lifinin zarı sarkolemmadır. Çekirdekler zarın hemen altında, miyofibriller ise hücre boyunca yan yana uzanır. Enine bantlar, tekrarlanan sarkomerlerin hizalanmasından doğar.','Kesiti açtıkça tek bir miyofibril öne çıkar. Onun üzerindeki iki Z çizgisi arasında kalan bölüm bir sarkomerdir.'],
+ ['Lif demeti','Biseps · Enine kesit','Bir demette kaç hücre görüyorsun?','Bisepsi enine kesince birçok uzun kas lifinin uçlarını yan yana görürsün. Bir grup lifi birlikte saran bağ dokusu, o demetin sınırını çizer.',''],
+ ['Kas lifi','Tek hücre · Boyuna kesit','Uyarı kasılmaya nasıl dönüşür?','Şimdi demette seçtiğin tek hücrenin kısa bir bölümüne yandan bakıyorsun. İçindeki paralel şeritlerin her biri bir miyofibril. Enine ince çizgiler ise sarkomerlerin sınırları.',''],
  ['Sarkomer','Miyofibril → sarkomer','İplikler nasıl kayar?','Uyarı ile hücre içinde kalsiyum artar ve aktindeki bağlanma bölgeleri açılır. Miyozin başları aktine tutunup onu merkeze çeker. ATP bağlanması başı ayırır, ATP hidrolizi yeni çevrime hazırlar.','Bir kısalma evresini ilerlet. İnce ve kalın ipliklerin boyları aynı kalırken örtüşmeleri artar ve iki Z çizgisi birbirine yaklaşır.'],
  ['Hipertrofi','Lifin enine kesiti','Haftalar içinde büyüme','Tekrarlanan yüklenme, kas hücresinde protein sentezini düzenleyen sinyalleri tetikler. Zaman içinde biriken kas proteinleri lifin enine kesit alanının artmasına katkıda bulunur.','Yeterince zorlayıcı setler, düzenli antrenman ve zamanla artan çalışma uyaranı gelişimi destekler. Beslenme ve toparlanma da bu sürece eşlik eder. Kesikli çizgi başlangıç kesitidir.']
 ];
 const cv=$('scene'), g=cv.getContext('2d'), tau=2*Math.PI;
 let mode=0,t=.46,playing=false,last=0,heavy=false,deep=false,frame=0;
-const times=[.46,.42,.52,.25,.55];
+const times=[.46,0,0,.25,.55];
 function line(x,y,X,Y,color,w=2){g.beginPath();g.moveTo(x,y);g.lineTo(X,Y);g.strokeStyle=color;g.lineWidth=w;g.stroke()}
 function oval(x,y,rx,ry,color){g.beginPath();g.ellipse(x,y,rx,ry,0,0,tau);g.fillStyle=color;g.fill()}
 function tag(txt,x,y,X,Y){line(x,y,X,Y,'#93a99d',1);oval(x,y,2.7,2.7,'#bce4d0');g.font='bold 15px system-ui';let width=g.measureText(txt).width;let px=Math.max(6,Math.min(614-width,X-width/2));g.fillStyle='#132022';g.fillRect(px-3,Y-16,width+6,21);g.fillStyle='#edece3';g.fillText(txt,px,Y)}
@@ -42,21 +42,154 @@ function arm(){
  let arrow=heavy?49:27;line(x,y+10,x,y+arrow,'#abebd3',3);line(x,y+arrow,x-5,y+arrow-7,'#abebd3');line(x,y+arrow,x+5,y+arrow-7,'#abebd3');
  tag(deep?'Brakiyalis':'Biseps',257,139,155,111);tag('Dirsek',e[0],e[1],164,258);tag('Dambıl',x+24,y,478,Math.min(342,y+20));if(!deep)tag('Tendon',p[0],p[1],386,190)
 }
-function rod(x,y,rx,ry,dx,dy,body,face,bands=false){
- const grad=g.createLinearGradient(x,y-ry,x,y+ry);grad.addColorStop(0,'#ffe0b7');grad.addColorStop(.17,body);grad.addColorStop(.68,body);grad.addColorStop(1,'#542f39');
- g.beginPath();g.moveTo(x,y-ry);g.lineTo(x+dx,y+dy-ry);g.ellipse(x+dx,y+dy,rx,ry,0,-Math.PI/2,Math.PI/2);g.lineTo(x,y+ry);g.ellipse(x,y,rx,ry,0,Math.PI/2,1.5*Math.PI);g.fillStyle=grad;g.fill();
- for(let i=1;i<13;i++){let s=i/13;if(bands){g.beginPath();g.ellipse(x+dx*s,y+dy*s,rx,ry,0,-Math.PI/2,Math.PI/2);g.strokeStyle=i%2?'#702c42aa':'#ffc4a788';g.lineWidth=2;g.stroke()}else{let a=Math.PI*s;line(x+rx*Math.sin(a),y+ry*Math.cos(a),x+dx+rx*Math.sin(a),y+dy+ry*Math.cos(a),'#ffd0ac55',1)}}
- oval(x+dx,y+dy,rx,ry,face)
-}
 function packing(fn){for(let row=-5;row<=5;row++)for(let col=-5;col<=5;col++){let x=(col+(Math.abs(row)%2)*.5)*.194,y=row*.17;if(x*x+y*y<.82)fn(x,y,row,col)}}
-function cut(micro){
- let x=133,y=212,dx=202,dy=-38,rx=47,ry=76;
- rod(x,y,rx,ry,dx,dy,micro?'#bb6969':'#a3564d','#623b42',micro);
- packing((a,b,row,col)=>oval(x+dx+a*rx,y+dy+b*ry,3.9,6.9,(row+col)%3?'#e29a80':'#f4b49d'));
- let extend=20+t*128;rod(x+dx,y+dy,8,12,extend,-extend*.21,micro?'#c8796f':'#c48268','#ffd8a6',true);
- if(micro){for(let i=0;i<4;i++)oval(152+i*47,142-i*8,8,3.5,'#bea4d8');tag('Çekirdek',200,133,154,74)}
- tag(micro?'Sarkolemma':'Bağ dokusu kılıfı',190,266,160,319);tag(micro?'Miyofibriller':'Kas lifleri',351,211,430,278);
- tag(micro?'Tek miyofibril':'Tek kas lifi',x+dx+extend,y+dy-extend*.21,469,96)
+const bundlePhases = [
+ ['Kas kesiti', 'Bisepsi enine kestiğini düşün. Kalın, açık renkli sınırlar kasın içini demetlere ayırır. Ortadaki demet mercek altında.'],
+ ['Bir demet', 'Aynı kesite yaklaştık. Demetin çevresindeki kalın bağ dokusu perimisyumdur. İçindeki her pembe bölme ayrı bir kas hücresidir.'],
+ ['Tek lif', 'Yeşil sınır bir kas lifini işaretliyor. Komşu bir life dokunup yerini karşılaştırabilirsin. Sonraki sahnede seçtiğin hücreye yandan bakacağız.']
+];
+const cellPhases = [
+ ['Uyarı', 'Elektriksel uyarı kas lifinin zarı boyunca ilerler. Yeşil ışığın T-tübülüne ulaşmasını izle.'],
+ ['Kalsiyum salımı', 'T-tübülü zarın içeri uzanan kıvrımıdır. Buradaki uyarı, komşu depodan hücre içine kalsiyum salınmasını tetikler.'],
+ ['Kasılma', 'Kalsiyum, aktinle miyozinin etkileşmesine izin verir. Bu yüksüz kısalma örneğinde miyofibrilin Z çizgileri yaklaşır. Üstteki kesikli ölçü başlangıç aralığıdır.'],
+ ['Gevşeme', 'Uyarı sona erince kalsiyum depoya pompalanır. Aktin ile miyozin arasındaki etkin etkileşim azalır ve lif gevşer.']
+];
+function smooth(a,b,v) {
+ const u=Math.max(0, Math.min(1,(v-a)/(b-a)));
+ return u*u*(3-2*u);
+}
+function scenePhase(){
+ return mode===1 ? (t<.24?0:t<.70?1:2) : (t<.25?0:t<.50?1:t<.79?2:3);
+}
+function path(points, fill, stroke, width=1){
+ g.beginPath();points.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();
+ g.fillStyle=fill;g.fill();if(stroke){g.strokeStyle=stroke;g.lineWidth=width;g.stroke()}
+}
+function label(text,x,y,color='#eae9db',size=16,align='left'){
+ g.save();g.textAlign=align;g.font='600 '+size+'px system-ui';g.fillStyle=color;g.fillText(text,x,y);g.restore()
+}
+// Clip a convex region against each neighbouring seed's perpendicular bisector.
+function tissueCells(outline,seeds){
+ return seeds.map(([x,y],i)=>{
+  let vertices=outline;
+  seeds.forEach(([a,b],j)=>{
+   if(i===j)return;
+   const distance=([px,py])=>(px-(x+a)/2)*(a-x)+(py-(y+b)/2)*(b-y);
+   const clipped=[];
+   vertices.forEach((p,k)=>{
+    const q=vertices[(k+1)%vertices.length],dp=distance(p),dq=distance(q);
+    if(dp<=0)clipped.push(p);
+    if((dp<=0)!==(dq<=0)){const f=dp/(dp-dq);clipped.push([p[0]+f*(q[0]-p[0]),p[1]+f*(q[1]-p[1])])}
+   });
+   vertices=clipped
+  });
+  return vertices
+ })
+}
+const bundleSeeds=[[0,0],[-82,-59],[-2,-93],[94,-62],[110,8],[72,77],[-15,83],[-90,49],[-117,-8]];
+const muscleOutline=Array.from({length:80},(_,i)=>{
+ const a=tau*i/80,r=1+.036*Math.sin(3*a+.3);
+ return [166*r*Math.cos(a),130*r*Math.sin(a)]
+});
+const fascicles=tissueCells(muscleOutline,bundleSeeds).map((outline,i)=>{
+ const [cx,cy]=bundleSeeds[i];
+ const seeds=[];
+ for(let j=-5;j<=5;j++)for(let k=-5;k<=5;k++){
+  const x=cx+(k+.5*(j&1))*14+2.3*Math.sin(2*k+j),y=cy+j*12+2*Math.cos(k-2*j);
+  // A grid extending past each outline also fills irregular edge cells.
+  seeds.push([x,y])
+ }
+ return {outline,cells:tissueCells(outline,seeds).map((polygon,j)=>({polygon,seed:seeds[j]})).filter(c=>c.polygon.length>=3)}
+});
+const central=fascicles[0];let chosen=central.cells.reduce((a,b)=>Math.hypot(...a.seed)<Math.hypot(...b.seed)?a:b);
+function bundleScale(){return 1+1.96*smooth(.10,.66,t)}
+function bundleScene(){
+ const zoom=bundleScale(),phase=scenePhase();
+ g.save();g.beginPath();g.roundRect(12,34,596,281,18);g.clip();
+ g.translate(310,175);g.scale(zoom,zoom);
+ path(muscleOutline,'#d4a899','#e8bfa5',4);
+ fascicles.forEach(({outline,cells},i)=>{
+  const focus=i===0;
+  for(const [j,cell] of cells.entries()){
+   const light=(focus?55:40)+6*Math.sin(j*3.7+i);
+   path(cell.polygon,'hsl('+(7+(j%5))+' 43% '+light+'%)',focus?'#e3ae9c':'#b7867e',.65);
+   // Peripheral nuclei in transverse section.
+   if(cell.polygon.length>=4&&j%3===0){
+    const a=cell.polygon[0],b=cell.polygon[1];oval((a[0]+b[0])/2,(a[1]+b[1])/2,1.45,.75,'#805166')
+   }
+  }
+  g.beginPath();outline.forEach(([x,y],n)=>n?g.lineTo(x,y):g.moveTo(x,y));g.closePath();g.strokeStyle=focus?'#ffe6b0':'#e4baab';g.lineWidth=focus?2.4:2;g.stroke()
+ });
+ if(phase===2)path(chosen.polygon,'#aedec4','#eaffdf',1.3);
+ g.restore();
+ label(['Biseps · enine kesit','Mercekteki demet','Demetin içinde tek hücre'][phase],20,24);
+ label(['Açık sınır  ·  Bir demeti çevreler','Her pembe bölme  ·  Bir kas lifi','Yeşil bölme  ·  Seçili kas lifi'][phase],310,353,'#edcfac',19,'center');
+}
+function hitPolygon(x,y,points){
+ let inside=false;
+ for(let j=0,k=points.length-1;j<points.length;k=j++){
+  const [a,b]=points[j],[c,d]=points[k];
+  if((b>y)!==(d>y)&&x<(c-a)*(y-b)/(d-b)+a)inside=!inside
+ }
+ return inside
+}
+cv.addEventListener('click',event=>{
+ if(mode!==1)return;
+ const box=cv.getBoundingClientRect(),s=bundleScale();
+ const x=((event.clientX-box.left)*620/box.width-310)/s,y=((event.clientY-box.top)*390/box.height-175)/s;
+ const cell=central.cells.find(c=>hitPolygon(x,y,c.polygon));
+ if(cell){chosen=cell;seek(1)}
+});
+function cellScene(){
+ const phase=scenePhase();
+ label('Seçili kas lifi · boyuna kesit',20,24);
+ // A longitudinal cut through a short segment of the fibre.
+ const wash=g.createLinearGradient(0,90,0,277);
+ wash.addColorStop(0,'#573c48');wash.addColorStop(.45,'#463039');wash.addColorStop(1,'#342d36');
+ g.fillStyle=wash;g.beginPath();g.roundRect(30,95,560,182,34);g.fill();
+ g.strokeStyle='#a6d9be';g.lineWidth=3;g.stroke();
+ // Invaginated sarcolemma conducts the signal into the fibre.
+ g.beginPath();g.moveTo(213,95);g.lineTo(213,155);g.quadraticCurveTo(222,166,231,155);g.lineTo(231,95);
+ g.fillStyle='#1c2828';g.fill();g.strokeStyle='#a6d9be';g.lineWidth=3;g.stroke();
+ line(215,95,229,95,'#1c2828',5);
+ for(const x of [87,451]){oval(x,108,18,5,'#bd9bca');oval(x+3,107,5,2,'#88678f')}
+ for(const x of [192,237]){
+  g.fillStyle='#6e7f9e';g.beginPath();g.roundRect(x,132,14,38,6);g.fill();
+ }
+ const shorten=smooth(.49,.73,t)*(1-smooth(.80,1,t)),spacing=52-13*shorten;
+ for(let row=0;row<3;row++){
+  const y=194+row*26;
+  const left=310-4.5*spacing;
+  for(let i=0;i<9;i++){
+   let x=left+i*spacing;
+   g.fillStyle='#cb8574';g.fillRect(x,y,spacing,16);
+   g.fillStyle='#a75f62';g.fillRect(x+spacing/2-10,y,20,16);
+   line(x,y-1,x,y+17,'#f3c3ac',2);
+   line(x+3,y+5,x+spacing-3,y+5,'#ebb29a',1)
+  }
+  line(left+9*spacing,y-1,left+9*spacing,y+17,'#f3c3ac',2)
+ }
+ let progress=Math.min(1,t/.23);
+ if(phase===0||t<.33){
+  let x=progress<.72?55+167*progress/.72:222,y=progress<.72?95:95+61*(progress-.72)/.28;
+  g.save();g.shadowBlur=16;g.shadowColor='#aef6ca';oval(x,y,7,7,'#d4ffb6');g.restore()
+ }
+ // Calcium leaves the adjacent SR storage sacs and returns during relaxation.
+ for(let i=0;i<18;i++){
+  const sx=i%2?244:198,sy=146+(i%5)*3;
+  const spread=smooth(.25+i%4*.015,.49+i%3*.012,t)*(1-smooth(.79,.98,t));
+  const x=sx+(94+(i*71)%410-sx)*spread,y=sy+(179+(i*19)%77-sy)*spread;
+  oval(x,y,2.8,2.8,'#ffd37d')
+ }
+ if(phase===0){tag('Hücre zarı',115,95,96,64);tag('T-tübülü',223,146,308,66)}
+ if(phase===1||phase===3){tag('Kalsiyum deposu',245,148,329,67);label('●  Kalsiyum',474,68,'#ffd37d')}
+ if(phase===2){
+  let x=310-26, X=x+52;
+  g.setLineDash([4,3]);line(x,181,X,181,'#e0d4b7',2);g.setLineDash([]);
+  line(x,176,x,185,'#e0d4b7');line(X,176,X,185,'#e0d4b7');tag('İlk Z aralığı',310,181,358,65)
+ }
+ tag('Miyofibril',412,248,469,313);
+ label(['Uyarı zar boyunca ilerler','Kalsiyum depodan salınır','Z çizgileri birbirine yaklaşır','Kalsiyum depoya döner'][phase],310,353,'#edcfac',19,'center')
 }
 function sarcomere(){
  let L=75+72*t,R=620-L;for(let z of [L,R]){line(z,98,z,278,'#d8c9ef',6);tag('Z çizgisi',z,102,z,73)}
@@ -68,14 +201,27 @@ function sarcomere(){
  tag('Aktin',L+38,213,153,315);tag('Miyozin',308,230,370,315);line(310,113,310,253,'#e7c4ad55',1)
 }
 function growth(){let r=81+30*t,x=305,y=193;oval(x,y,r,r,'#ecc3a4');oval(x,y,r-4,r-4,'#78434a');packing((a,b,row,col)=>{let X=x+a*r,Y=y+b*r;oval(X,Y,r*.087,r*.081,(col+row)%3?'#c67868':'#d99578');for(let i=-1;i<=1;i++)line(X-3,Y+i*2,X+3,Y+i*2,'#f4b69a',.8)});g.setLineDash([5,5]);g.beginPath();g.arc(x,y,81,0,tau);g.strokeStyle='#a9f1d8';g.lineWidth=2;g.stroke();g.setLineDash([]);tag('Başlangıç',x-80,y,126,157);tag('Lif sınırı',x+r-4,y+12,481,169);tag('Miyofibriller',x+16,y+35,460,276);g.fillStyle='#bcdacf';g.font='16px system-ui';g.textAlign='center';g.fillText(t<.26?'Başlangıç kesiti':t<.54?'Tekrarlanan antrenman uyaranı':t<.78?'Protein yapımı ve yenilenme':'Birikimli uyum · daha geniş kesit',310,346);g.textAlign='left'}
-const drawings=[arm,()=>cut(false),()=>cut(true),sarcomere,growth];
+const drawings=[arm,bundleScene,cellScene,sarcomere,growth];
 function draw(){let w=cv.clientWidth;if(!w)return;let h=w*390/620,dpr=Math.min(devicePixelRatio||1,2);if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}else g.clearRect(0,0,620,390);g.setTransform(cv.width/620,0,0,cv.height/390,0,0);drawings[mode]();
  let phase=t<.42?'Kaldırma':t<.56?'Yük altında tutma':'Kontrollü indirme';
- $('rangeText').textContent=['Tekrar · '+phase,'Lifi demetten ayır','Miyofibrili liften ayır','Gevşek → kısalmış','Başlangıç → haftalar sonra'][mode];cv.setAttribute('aria-label',stages[mode][2]+' · '+$('rangeText').textContent)}
+ const guided=mode===1||mode===2;
+ const step=guided?scenePhase():0;
+ const entry=guided?(mode===1?bundlePhases:cellPhases)[step]:null;
+ if(entry){
+  if($('note').textContent!==entry[1])$('note').textContent=entry[1];
+  [...$('tools').children].forEach((button,i)=>button.setAttribute('aria-pressed',i===step))
+ }
+ $('rangeText').textContent=['Tekrar · '+phase,entry?.[0],entry?.[0],'Gevşek → kısalmış','Başlangıç → haftalar sonra'][mode];cv.setAttribute('aria-label',stages[mode][2]+' · '+$('rangeText').textContent)}
 function pause(){playing=false;cancelAnimationFrame(frame);$('play').textContent='Oynat'}
 function tick(now){if(!playing)return;t=Math.min(1,t+(now-last)/8500);last=now;$('time').value=Math.round(t*100);draw();if(t>=1)pause();else frame=requestAnimationFrame(tick)}
 function option(label,pressed,fn){let b=document.createElement('button');b.textContent=label;b.setAttribute('aria-pressed',pressed);b.onclick=fn;$('tools').append(b)}
-function options(){ $('tools').replaceChildren();if(mode===0){option(heavy?'Ağır dambıl':'Hafif dambıl',heavy,()=>{heavy=!heavy;options();draw()});option('Derin katman',deep,()=>{deep=!deep;options();draw()});}}
+function seek(value){pause();t=value;$('time').value=Math.round(t*100);draw()}
+function options(){ $('tools').replaceChildren();if(mode===1||mode===2){
+ const phases=mode===1?bundlePhases:cellPhases;
+ const positions=mode===1?[0,.64,1]:[.14,.42,.72,.96];
+ phases.forEach(([name],i)=>option(name,i===scenePhase(),()=>seek(positions[i])));
+ }
+ if(mode===0){option(heavy?'Ağır dambıl':'Hafif dambıl',heavy,()=>{heavy=!heavy;options();draw()});option('Derin katman',deep,()=>{deep=!deep;options();draw()});}}
 function select(i){times[mode]=t;pause();mode=i;t=times[i];let s=stages[i];$('scale').textContent=s[1];$('tag').textContent=s[0];$('title').textContent=s[2];$('copy').textContent=s[3];$('note').textContent=s[4];$('next').textContent=i===4?'Kola dön ↩':stages[i+1][0]+' →';$('time').value=t*100;document.querySelectorAll('.tabs button').forEach((b,j)=>b.setAttribute('aria-pressed',j===i));options();draw()}
 stages.forEach((s,i)=>{let b=document.createElement('button');b.textContent=s[0];b.onclick=()=>select(i);document.querySelector('.tabs').append(b)});
 $('next').onclick=()=>select((mode+1)%5);$('time').oninput=e=>{pause();t=+e.target.value/100;draw()};$('play').onclick=()=>{if(playing){pause();return}if(t>=1)t=0;playing=true;last=performance.now();$('play').textContent='Durdur';frame=requestAnimationFrame(tick)};
