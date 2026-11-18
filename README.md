@@ -1,7 +1,13 @@
 <div align="center">
 
 # Anatomy
-### Explore the human body, one structure at a time.
+### Follow a breath
+
+Open **Nefes ve kan** to follow inhaled oxygen through the airways, alveolar gas exchange, both sides of the heart and tissue delivery. Pause the motion or jump between five illustrated scenes. Select a chamber in the heart diagram, open the rotatable 3D cutaway, or test yourself on three unlabeled chamber questions. **Adımı paylaş** links to a lesson step. **Görünümü paylaş** saves the atlas camera, selected organ and layers in a URL. Search the atlas by Turkish, English or Latin name.
+
+Physiology reference: [NHLBI · How the lungs work](https://www.nhlbi.nih.gov/health/lungs).
+
+## Explore the human body, one structure at a time.
 
 An interactive 3D anatomy atlas built with Three.js.
 
@@ -106,3 +112,4 @@ Anatomy is a **schematic educational model**, with geometry created in code. It 
 - [Three.js third-party MIT license](dist/vendor/THREE-LICENSE.txt)
 
 <sub>Browser interaction checks were performed using the software rendering fallback; GPU rendering was not verified in that environment.</sub>
+

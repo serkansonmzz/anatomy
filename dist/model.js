@@ -6,7 +6,7 @@ import {SoftwareRenderer} from './software-renderer.js';
 
 const V=(a)=>new THREE.Vector3(...a);
 const C={bone:0xb8c3b7,heart:0xb3494c,artery:0xc95759,vein:0x527eae,lung:0xc17d88,nerve:0xcfb777,brain:0xc59f91,skin:0x82a5b4};
-export function createAtlas(container,miniContainer,onPick,onHover){
+export function createAtlas(container,miniContainer,onPick,onHover,onHeartPart){
  const scene=new THREE.Scene();
  const camera=new THREE.PerspectiveCamera(34,1,.03,80);camera.position.set(.3,5.2,19.5);
  let renderer;const gpuCanvas=document.createElement('canvas');const gl=gpuCanvas.getContext('webgl2',{antialias:true,alpha:true});try{renderer=gl?new THREE.WebGLRenderer({canvas:gpuCanvas,context:gl,antialias:true,alpha:true}):new SoftwareRenderer();}catch{renderer=new SoftwareRenderer();}const soft=!!renderer.software;
@@ -67,6 +67,24 @@ export function createAtlas(container,miniContainer,onPick,onHover){
  path(heart,[[.22,7.19,.27],[.12,7.44,.25],[.22,7.57,.11],[.40,7.45,-.03]],.105,C.artery);
  path(heart,[[.33,7.15,.42],[.37,7.39,.35],[.20,7.47,.20],[-.13,7.4,.09]],.079,C.vein);
  path(heart,[[-.09,7.13,.2],[-.13,7.38,.17],[-.13,7.59,.12]],.079,C.vein);
+ // Open chamber walls face the viewer in the anterior cutaway.
+ heart.children.forEach(mesh=>{mesh.userData.heartExterior=true});
+ const chamberParts=[
+  ['Sağ kulakçık',-.04,7.10,.125,.13,0x975c77],['Sağ karıncık',.08,6.86,.165,.20,0x96526d],
+  ['Sol kulakçık',.29,7.11,.125,.12,0xc07a78],['Sol karıncık',.36,6.82,.135,.24,0xb96868]
+ ];
+ for(const [name,x,y,rx,ry,color] of chamberParts){
+  const bowl=new THREE.SphereGeometry(1,28,18,0,Math.PI);
+  bowl.scale(rx,ry,-.14);
+  const wall=add(heart,bowl,material(color,{side:THREE.DoubleSide}),[x,y,.36]);
+  wall.userData.heartPart=name;
+  const rim=new THREE.TorusGeometry(1,name==='Sol karıncık'?.16:.075,8,48);
+  rim.scale(rx,ry,.13);
+  add(heart,rim,material(color),[x,y,.36]).userData.heartPart=name;
+ }
+ for(const [name,x,y,r] of [['Triküspit kapak',.005,6.993,.061],['Mitral kapak',.326,7.003,.058],['Pulmoner kapak',.15,7.05,.044],['Aort kapağı',.216,7.09,.043]]){
+  const valve=add(heart,new THREE.TorusGeometry(r,.012,8,24),material(0xf1c68d),[x,y,.38],[.64,0,0]);valve.userData.heartPart=name;
+ }
  const cor=groups.coronary;
  path(cor,[[.20,7.29,.48],[.24,7.12,.57],[.28,6.93,.57],[.36,6.67,.43]],.018,0xd49173);
  path(cor,[[.18,7.22,.48],[-.02,7.12,.47],[-.11,6.97,.39]],.017,0xd08e73);
@@ -156,24 +174,24 @@ export function createAtlas(container,miniContainer,onPick,onHover){
  const miniScene=new THREE.Scene();light(miniScene);const miniCamera=new THREE.PerspectiveCamera(33,1,.01,80);const miniRenderer=soft?new SoftwareRenderer():new THREE.WebGLRenderer({antialias:true,alpha:true});miniRenderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));miniRenderer.outputColorSpace=THREE.SRGBColorSpace;miniRenderer.toneMapping=THREE.ACESFilmicToneMapping;miniRenderer.toneMappingExposure=1.2;miniContainer.appendChild(miniRenderer.domElement);
  let miniObject=null,selected='heart',hovered=null,transition=null,skinOpacity=.12,isolated=false,anatomySex='male';
  const initialMat=new Map();for(const g of Object.values(groups))g.traverse(m=>{if(m.isMesh){initialMat.set(m,{opacity:m.material.opacity,transparent:m.material.transparent,depthWrite:m.material.depthWrite});}});
- function updateMini(id){if(miniObject){miniScene.remove(miniObject);miniObject.traverse(m=>{if(m.isMesh)m.material.dispose()})}const original=groups[id];miniObject=original.clone(true);miniObject.visible=true;miniObject.position.set(0,0,0);miniObject.traverse(m=>{if(m.isMesh){m.visible=!m.userData.obsolete&&(!m.userData.anatomySex||m.userData.anatomySex===anatomySex);m.material=m.material.clone();m.material.opacity=1;m.material.transparent=false;m.material.depthWrite=true;m.material.emissive.setHex(0);}});const box=new THREE.Box3().setFromObject(miniObject),center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());miniObject.position.sub(center);miniScene.add(miniObject);const max=Math.max(size.y,size.x/(miniContainer.clientWidth/miniContainer.clientHeight),size.z);miniCamera.position.set(max*.16,max*.15,max*2.25);miniCamera.lookAt(0,0,0);}
+ function updateMini(id){if(miniObject){miniScene.remove(miniObject);miniObject.traverse(m=>{if(m.isMesh)m.material.dispose()})}const original=groups[id];miniObject=original.clone(true);miniObject.visible=true;miniObject.position.set(0,0,0);miniObject.traverse(m=>{if(m.isMesh){m.visible=!m.userData.heartPart&&!m.userData.obsolete&&(!m.userData.anatomySex||m.userData.anatomySex===anatomySex);m.material=m.material.clone();m.material.opacity=1;m.material.transparent=false;m.material.depthWrite=true;m.material.emissive.setHex(0);}});const box=new THREE.Box3().setFromObject(miniObject),center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());miniObject.position.sub(center);miniScene.add(miniObject);const max=Math.max(size.y,size.x/(miniContainer.clientWidth/miniContainer.clientHeight),size.z);miniCamera.position.set(max*.16,max*.15,max*2.25);miniCamera.lookAt(0,0,0);}
  function setSelected(id){selected=id;for(const [key,g] of Object.entries(groups))g.traverse(m=>{if(m.isMesh)m.material.emissive.setHex(key===id?0x2b1912:0)});updateMini(id)}
  const raycaster=new THREE.Raycaster(),mouse=new THREE.Vector2();let down=null;
  function intersect(event){const rect=renderer.domElement.getBoundingClientRect();mouse.set((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1);raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects(pickables.filter(m=>m.parent.visible&&m.visible&&(m.userData.id!=='skin'||isolated)),false);return hits.find(hit=>hit.object.material.opacity>.5)||hits.find(hit=>hit.object.material.opacity>.13);}
  renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};transition=null});
- renderer.domElement.addEventListener('pointerup',e=>{if(down&&Math.hypot(e.clientX-down.x,e.clientY-down.y)<6){const hit=intersect(e);if(hit)onPick(hit.object.userData.id)}down=null});
+ renderer.domElement.addEventListener('pointerup',e=>{if(down&&Math.hypot(e.clientX-down.x,e.clientY-down.y)<6){const hit=intersect(e);if(hit?.object.userData.heartPart)onHeartPart(hit.object.userData.heartPart);else if(hit)onPick(hit.object.userData.id)}down=null});
  renderer.domElement.addEventListener('pointermove',e=>{if(down)return;const hit=intersect(e);hovered=hit?.object.userData.id??null;renderer.domElement.style.cursor=hovered?'pointer':'grab';onHover(hovered,e)});
  renderer.domElement.addEventListener('pointerleave',()=>{onHover(null);down=null});
  function go(pos,target,duration=750){transition={start:performance.now(),from:camera.position.clone(),to:V(pos),tf:controls.target.clone(),tt:V(target),duration};controls.autoRotate=false;}
  function focus(id){const g=groups[id],box=new THREE.Box3().setFromObject(g),center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());let d=Math.max(2.05,size.y*1.9,size.x/camera.aspect*1.9,size.z*2.5);d=Math.min(21,d);go([center.x+.2,center.y+.15,center.z+d],center.toArray())}
- function setVisibility(visible,only,cut=false,sex='male'){const changed=anatomySex!==sex;anatomySex=sex;isolated=!!only;for(const [id,g]of Object.entries(groups)){g.visible=visible.has(id);g.traverse(m=>{if(!m.isMesh)return;m.visible=!m.userData.obsolete&&(!m.userData.anatomySex||m.userData.anatomySex===sex)&&!(cut&&m.userData.cutawayFront);const initial=initialMat.get(m);m.material.opacity=id==='skin'?(only==='skin'?.8:skinOpacity):initial.opacity;m.material.transparent=id==='skin'||initial.transparent;m.material.depthWrite=id==='skin'?false:initial.depthWrite;});}if(changed&&selected==='urethra')updateMini(selected);}
+ function setVisibility(visible,only,cut=false,sex='male',heartCut=false){const changed=anatomySex!==sex;anatomySex=sex;isolated=!!only;for(const [id,g]of Object.entries(groups)){g.visible=visible.has(id);g.traverse(m=>{if(!m.isMesh)return;m.visible=(!m.userData.heartPart||heartCut)&&(!m.userData.heartExterior||!heartCut)&&!m.userData.obsolete&&(!m.userData.anatomySex||m.userData.anatomySex===sex)&&!(cut&&m.userData.cutawayFront);const initial=initialMat.get(m);m.material.opacity=id==='skin'?(only==='skin'?.8:skinOpacity):initial.opacity;m.material.transparent=id==='skin'||initial.transparent;m.material.depthWrite=id==='skin'?false:initial.depthWrite;});}if(changed&&selected==='urethra')updateMini(selected);}
  function setSkin(value){skinOpacity=value;groups.skin.traverse(m=>{if(m.isMesh)m.material.opacity=value})}
  function resize(){const w=container.clientWidth,h=container.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();const mw=miniContainer.clientWidth,mh=miniContainer.clientHeight;miniRenderer.setSize(mw,mh);miniCamera.aspect=mw/mh;miniCamera.updateProjectionMatrix();if(selected)updateMini(selected)}
  const observer=new ResizeObserver(resize);observer.observe(container);observer.observe(miniContainer);resize();setSelected('heart');
  let frame=0;const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
  function animate(t){requestAnimationFrame(animate);if(document.hidden)return;if(transition){const f=Math.min(1,(performance.now()-transition.start)/transition.duration),ease=1-Math.pow(1-f,3);camera.position.lerpVectors(transition.from,transition.to,ease);controls.target.lerpVectors(transition.tf,transition.tt,ease);if(f===1)transition=null}controls.update();if(!reduced){const beat=1+Math.max(0,Math.sin(t*.0075))**9*.018;groups.heart.scale.setScalar(beat);if(miniObject&&selected==='heart')miniObject.rotation.y=Math.sin(t*.00035)*.14;}renderer.render(scene,camera);if(frame++%2===0)miniRenderer.render(miniScene,miniCamera);}
  requestAnimationFrame(animate);
- return {groups,renderer,camera,controls,focus,focusReproductive(){go([.12,4.16,3.3],[0,4.04,.07]);},setSelected,setVisibility,setSkin,
+ return {groups,renderer,camera,controls,focus,restoreCamera(p,t){go(p,t);},focusReproductive(){go([.12,4.16,3.3],[0,4.04,.07]);},setSelected,setVisibility,setSkin,
   reset(){go([.3,5.2,Math.max(18.8,11/camera.aspect)],[0,4.8,0]);},
   view(v){let d=camera.position.distanceTo(controls.target);d=Math.max(16,d);const p=v==='back'?[0,5,-d]:v==='side'?[d,5,.05]:[.2,5,d];go(p,[0,4.8,0]);},
   zoom(n){const delta=camera.position.clone().sub(controls.target).multiplyScalar(n);delta.clampLength(1,27);camera.position.copy(controls.target.clone().add(delta));transition=null;},
@@ -182,3 +200,4 @@ export function createAtlas(container,miniContainer,onPick,onHover){
   hasMesh(id){return groups[id].children.length>0;}
  };
 }
+

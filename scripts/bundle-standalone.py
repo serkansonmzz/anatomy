@@ -29,6 +29,7 @@ script = '\n'.join([
     'const {systems,organs,tours,reproductiveInteriors}=DATA;',
     'const {SoftwareRenderer}=(()=>{' + module('software-renderer.js','SoftwareRenderer') + '})();',
     'const {buildReproductive}=(()=>{' + module('reproductive.js','buildReproductive') + '})();',
+    'const {installOxygen}=(()=>{' + module('oxygen.js','installOxygen') + '})();',
     'const {createAtlas}=(()=>{' + module('model.js','createAtlas') + '})();',
     re.sub(r'^import .*?;\s*$', '', (dist / 'app.js').read_text(), flags=re.M),
     '})();'
@@ -39,3 +40,4 @@ html = re.sub(r'\s*<script type="importmap">.*?</script>', '', html)
 html = html.replace('<script type="module" src="./app.js"></script>', '<script>' + script.replace('</script', '<\\/script') + '</script>')
 (dist / 'Anatomy.html').write_text(html)
 print(f'Standalone atlas: {dist / "Anatomy.html"} ({len(html.encode()):,} bytes)')
+
